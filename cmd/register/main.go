@@ -43,12 +43,13 @@ const (
 )
 
 var (
-	cfg          elementalv1.Config
-	debug        bool
-	reset        bool
-	installation bool
-	configPath   string
-	statePath    string
+	cfg                   elementalv1.Config
+	debug                 bool
+	reset                 bool
+	installation          bool
+	configPath            string
+	statePath             string
+	systemAgentConfigPath string
 )
 
 var (
@@ -116,6 +117,13 @@ func newCommand(fs vfs.FS, client register.Client, stateHandler register.StateHa
 			if err := yaml.Unmarshal(data, &cfg); err != nil {
 				return fmt.Errorf("parsing returned configuration: %w", err)
 			}
+			// Optionally generate system agent config (which can be consumed when not installing)
+			if systemAgentConfigPath != "" {
+				log.Info("Generating system agent config")
+				if _, err := installer.WriteSystemAgentConfig(systemAgentConfigPath, cfg.Elemental); err != nil {
+					return fmt.Errorf("Generating system agent config: %w", err)
+				}
+			}
 			// Install
 			if installation {
 				log.Info("Installing elemental")
@@ -152,6 +160,7 @@ func newCommand(fs vfs.FS, client register.Client, stateHandler register.StateHa
 	cmd.Flags().BoolVarP(&debug, "debug", "d", false, "Enable debug logging")
 	cmd.Flags().StringVar(&configPath, "config-path", defaultConfigPath, "The full path of the elemental-register config")
 	cmd.Flags().StringVar(&statePath, "state-path", defaultStatePath, "The full path of the elemental-register config")
+	cmd.Flags().StringVar(&systemAgentConfigPath, "system-agent-config-path", "", "Optional path to generate system agent config file")
 	cmd.PersistentFlags().BoolP("version", "v", false, "print version and exit")
 	_ = viper.BindPFlag("version", cmd.PersistentFlags().Lookup("version"))
 	cmd.Flags().BoolVar(&reset, "reset", false, "Reset the machine to its original post-installation state")

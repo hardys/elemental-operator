@@ -25,6 +25,7 @@ package mocks
 import (
 	reflect "reflect"
 
+	elementalv1 "github.com/rancher/elemental-operator/api/v1beta1"
 	v1beta1 "github.com/rancher/elemental-operator/api/v1beta1"
 	register "github.com/rancher/elemental-operator/pkg/register"
 	gomock "go.uber.org/mock/gomock"
@@ -79,4 +80,18 @@ func (m *MockInstaller) ResetElemental(arg0 v1beta1.Config, arg1 register.State)
 func (mr *MockInstallerMockRecorder) ResetElemental(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetElemental", reflect.TypeOf((*MockInstaller)(nil).ResetElemental), arg0, arg1)
+}
+
+// WriteSystemAgentConfig mocks base method.
+func (m *MockInstaller) WriteSystemAgentConfig(arg0 string, arg1 elementalv1.Elemental) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WriteSystemAgentConfig", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return arg0, ret0
+}
+
+// WriteSystemAgentConfig indicates an expected call of WriteSystemAgentConfig.
+func (mr *MockInstallerMockRecorder) WriteSystemAgentConfig(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteSystemAgentConfig", reflect.TypeOf((*MockInstaller)(nil).WriteSystemAgentConfig), arg0, arg1)
 }

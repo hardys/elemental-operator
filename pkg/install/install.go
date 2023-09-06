@@ -56,6 +56,7 @@ const (
 type Installer interface {
 	ResetElemental(config elementalv1.Config, state register.State) error
 	InstallElemental(config elementalv1.Config, state register.State) error
+	WriteSystemAgentConfig(path string, config elementalv1.Elemental) (string, error)
 }
 
 func NewInstaller(fs vfs.FS) Installer {
@@ -120,7 +121,7 @@ func (i *installer) ResetElemental(config elementalv1.Config, state register.Sta
 // or `elemental reset` calls into the newly installed or resetted system.
 func (i *installer) getCloudInitConfigs(config elementalv1.Config, state register.State) ([]string, error) {
 	configs := []string{}
-	agentConfPath, err := i.writeSystemAgentConfig(config.Elemental)
+	agentConfPath, err := i.WriteSystemAgentConfig(tempSystemAgent, config.Elemental)
 	if err != nil {
 		return nil, fmt.Errorf("writing system agent configuration: %w", err)
 	}
@@ -248,7 +249,7 @@ func (i *installer) writeCloudInit(cloudConfig map[string]runtime.RawExtension) 
 	return f.Name(), nil
 }
 
-func (i *installer) writeSystemAgentConfig(config elementalv1.Elemental) (string, error) {
+func (i *installer) WriteSystemAgentConfig(path string, config elementalv1.Elemental) (string, error) {
 	kubeConfig := api.Config{
 		Kind:       "Config",
 		APIVersion: "v1",
@@ -307,9 +308,9 @@ func (i *installer) writeSystemAgentConfig(config elementalv1.Elemental) (string
 		},
 	})
 
-	f, err := i.fs.Create(tempSystemAgent)
+	f, err := i.fs.Create(path)
 	if err != nil {
-		return "", fmt.Errorf("creating temporary elemental-system-agent file: %w", err)
+		return "", fmt.Errorf("creating elemental-system-agent file: %w", err)
 	}
 	defer f.Close()
 
